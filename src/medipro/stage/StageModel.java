@@ -4,6 +4,7 @@ import java.awt.Image;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,6 +18,7 @@ import medipro.HangWire;
 import medipro.IKeyAction;
 import medipro.Vector2;
 import medipro.World;
+import medipro.WorldTemplate;
 
 public class StageModel implements IKeyAction {
 
@@ -159,8 +161,20 @@ public class StageModel implements IKeyAction {
         } catch (Exception e) {
         }
 
-        World world = new World(this, text, 800, 600, exampleCommand);
+        WorldTemplate worldTemplate = new WorldTemplate(text, 800, 600, exampleCommand);
+
+        World world = new World(this, worldTemplate);
         return world;
+    }
+
+    public World loadBinaryWorld(InputStream file) {
+        try (ObjectInputStream ois = new ObjectInputStream(file)) {
+            WorldTemplate worldTemplate = (WorldTemplate) ois.readObject();
+            World world = new World(this, worldTemplate);
+            return world;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Failed to load world");
+        }
     }
 
     public boolean hasHangWire() {
